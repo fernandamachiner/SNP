@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Interativo: Diagnóstico de Sinop/MT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals with Subtle Accents -->
+    <!-- Application Structure Plan: A thematic dashboard structure was chosen over a linear report format to enhance usability and storytelling. The flow guides the user from a high-level economic overview ("Visão Geral") through deepening layers of societal, health, security, and environmental challenges, culminating in an "SDG X-Ray". This narrative approach—starting with apparent prosperity and progressively revealing underlying issues—makes the complex interconnections within the report more digestible and impactful. A sticky navigation bar facilitates non-linear exploration across these themes. -->
+    <!-- Visualization & Content Choices: Data is presented to achieve specific communication goals. Goal: Inform -> KPI cards for a quick overview (e.g., PIB). Goal: Compare -> A bar chart for the gender pay gap visualizes inequality effectively. Goal: Show Change -> Line/bar charts are used for homicide and disease trends to highlight alarming progressions over time. Goal: Organize -> Complex topics like environmental issues and SDGs are simplified into icon-based grids and color-coded, clickable summaries, making dense information accessible and interactive. All visualizations use Chart.js (Canvas), adhering to the NO SVG/Mermaid constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7; /* Cor de fundo leve e neutra */
+            color: #1f2937; /* Cor de texto principal escura */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .kpi-card {
+             background-color: #fff;
+             border-left: 5px solid #4A9090;
+             transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4A9090;
+            border-bottom-color: #4A9090;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Diagnóstico de Sinop/MT</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Visão Geral</a>
+                        <a href="#society" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Sociedade</a>
+                        <a href="#health" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Saúde Pública</a>
+                        <a href="#security" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Segurança</a>
+                        <a href="#environment" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Meio Ambiente</a>
+                        <a href="#ods" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Raio-X ODS</a>
+                        <a href="#actions" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Ações ✨</a>
+                        <a href="#glossary-qa" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Glossário ✨</a>
+                        <a href="#ask-report" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Pergunte ao Relatório ✨</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="overview" class="text-center mb-16 scroll-mt-20">
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-800 mb-4">Sinop: O Paradoxo do Progresso</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-8">
+                Um polo de destaque no agronegócio brasileiro, Sinop exibe um crescimento econômico impressionante. Contudo, sob a superfície de prosperidade, emergem profundos desafios sociais, de saúde e ambientais. Este painel interativo explora as contradições de um desenvolvimento acelerado.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="kpi-card p-6 rounded-lg shadow-md">
+                    <h3 class="text-gray-500 text-md font-semibold">População Estimada (2024)</h3>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">216.000</p>
+                    <p class="text-sm text-gray-500 mt-1">Fonte: IBGE</p>
+                </div>
+                <div class="kpi-card p-6 rounded-lg shadow-md">
+                    <h3 class="text-gray-500 text-md font-semibold">PIB per capita (2021)</h3>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">R$ 64.607,12</p>
+                     <p class="text-sm text-gray-500 mt-1">Fonte: IBGE</p>
+                </div>
+                <div class="kpi-card p-6 rounded-lg shadow-md">
+                    <h3 class="text-gray-500 text-md font-semibold">IDHM (2010)</h3>
+                    <p class="text-3xl font-bold text-gray-800 mt-2">0,754 (Alto)</p>
+                     <p class="text-sm text-gray-500 mt-1">Fonte: PNUD</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="society" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">Retrato de uma Sociedade Desigual</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-10">
+                O rápido crescimento populacional e a economia pujante não se traduziram em equidade para todos. Questões como disparidade de renda, déficit habitacional e violações de direitos revelam as fraturas sociais do município, legados de um modelo de colonização que priorizou o capital sobre a inclusão.
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 chart-container h-96 md:h-[450px]">
+                    <canvas id="genderPayGapChart"></canvas>
+                </div>
+                <div class="flex flex-col gap-8">
+                    <div class="p-6 bg-white rounded-lg shadow-md">
+                        <h3 class="font-bold text-xl text-gray-800">Déficit Habitacional</h3>
+                        <p class="text-5xl font-bold text-[#E57373] mt-2">39%</p>
+                        <p class="text-gray-600 mt-2">Equivalente a 6.904 domicílios. Um desafio estrutural que persiste apesar dos programas habitacionais.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-lg shadow-md">
+                        <h3 class="font-bold text-xl text-gray-800">Violação de Direitos</h3>
+                        <p class="text-gray-600 mt-2">Sinop ocupa a <span class="text-3xl font-bold text-[#E57373]">82ª</span> posição nacional entre cidades com alta violação dos direitos da população negra.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="health" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">Saúde Pública Sob Pressão</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-10">
+                Com 75% da população dependendo exclusivamente do SUS, o sistema de saúde de Sinop enfrenta uma enorme pressão. Indicadores como a alta mortalidade infantil e o avanço de doenças transmissíveis e crônicas sinalizam uma crise na atenção primária, exigindo ações urgentes.
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="chart-container h-96 md:h-[450px]">
+                     <canvas id="diseaseTrendChart"></canvas>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-md flex flex-col justify-center items-center text-center">
+                    <h3 class="font-bold text-xl text-gray-800">Mortalidade Infantil (2022)</h3>
+                    <p class="text-6xl font-bold text-[#E57373] my-4">14,14</p>
+                    <p class="text-gray-600">óbitos por 1.000 nascidos vivos.</p>
+                    <p class="text-gray-500 mt-4">Este é o maior índice registrado desde 1996, muito acima da meta de 10, revelando falhas críticas na assistência materno-infantil.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="security" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">A Escalada da Violência</h2>
+             <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-10">
+                Os índices de violência em Sinop são alarmantes e revelam um grave problema de segurança pública. O crescimento expressivo no número de homicídios e a persistência dos feminicídios colocam o município em um patamar crítico, muito acima do considerado aceitável pela OMS.
+            </p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="chart-container h-96 md:h-[450px]">
+                    <canvas id="homicideChart"></canvas>
+                </div>
+                 <div class="chart-container h-96 md:h-[450px]">
+                    <canvas id="femicideChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="environment" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">O Custo Ambiental do Desenvolvimento</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-10">
+                O modelo econômico baseado no agronegócio e em grandes empreendimentos cobra um preço alto do meio ambiente. O desmatamento, a contaminação por agrotóxicos e os impactos de hidrelétricas comprometem ecossistemas e a saúde da população.
+            </p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 bg-white rounded-lg shadow-md text-center">
+                    <span class="text-5xl">🌳</span>
+                    <h3 class="font-bold text-xl mt-4 mb-2 text-gray-800">Desmatamento</h3>
+                    <p class="text-gray-600">A expansão da soja impulsionou um aumento de 85% na área plantada entre 2008 e 2018, contribuindo para a perda de biodiversidade e degradação do solo.</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-md text-center">
+                    <span class="text-5xl">💧</span>
+                    <h3 class="font-bold text-xl mt-4 mb-2 text-gray-800">Impacto Hidrelétrico</h3>
+                    <p class="text-gray-600">A UHE Sinop causou mortandade de mais de 30 toneladas de peixes, inundou milhares de hectares de floresta e viola direitos de comunidades tradicionais.</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-md text-center">
+                    <span class="text-5xl">☣️</span>
+                    <h3 class="font-bold text-xl mt-4 mb-2 text-gray-800">Uso de Agrotóxicos</h3>
+                    <p class="text-gray-600">O uso intensivo de agrotóxicos está associado a problemas de saúde na população, incluindo intoxicações e um possível aumento de casos de câncer infantojuvenil.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ods" class="scroll-mt-20 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">Raio-X dos Objetivos de Desenvolvimento Sustentável (ODS)</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-10">
+                A análise dos ODS revela que Sinop enfrenta "grandes desafios" ou "desafios significativos" na maioria das metas da Agenda 2030. Isso confirma que o crescimento econômico não tem se convertido em desenvolvimento sustentável e bem-estar para toda a população. Clique em um objetivo para ver um indicador crítico.
+            </p>
+            <div id="ods-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+            </div>
+        </section>
+
+        <section id="actions" class="mb-16 scroll-mt-20 text-center">
+            <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Próximos Passos: Análise e Ação ✨</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-8">
+                Com base nos dados apresentados, podemos gerar recomendações preliminares de políticas públicas para Sinop/MT, visando abordar os desafios mais críticos.
+            </p>
+            <button id="generate-recommendations" class="bg-[#4A9090] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#3B7A7A] transition-colors duration-300 shadow-lg">
+                ✨ Gerar Recomendações de Políticas Públicas
+            </button>
+            <div id="loading-spinner" class="hidden mt-6">
+                <div class="animate-spin inline-block w-8 h-8 border-4 border-t-transparent border-[#4A9090] rounded-full"></div>
+                <p class="text-gray-600 mt-2">Gerando recomendações...</p>
+            </div>
+            <div id="recommendations-output" class="hidden mt-8 p-6 bg-white rounded-lg shadow-xl text-left max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Recomendações Geradas:</h3>
+                <ul id="recommendations-list" class="list-disc list-inside text-gray-700 space-y-3">
+                    <!-- Recommendations will be inserted here -->
+                </ul>
+                <button id="close-recommendations" class="mt-6 bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-300">Fechar</button>
+            </div>
+        </section>
+
+        <section id="glossary-qa" class="mb-16 scroll-mt-20 text-center">
+            <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Glossário Interativo ✨</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-8">
+                Deseja entender melhor algum termo relacionado ao diagnóstico de Sinop/MT? Digite a palavra abaixo e o modelo de linguagem fornecerá uma explicação clara e contextualizada.
+            </p>
+            <div class="max-w-xl mx-auto flex flex-col sm:flex-row gap-4">
+                <input type="text" id="term-input" placeholder="Digite um termo (ex: IDHM, Arboviroses)" class="flex-grow p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4A9090]">
+                <button id="explain-term" class="bg-[#4A9090] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#3B7A7A] transition-colors duration-300 shadow-lg">
+                    ✨ Explicar Termo
+                </button>
+            </div>
+            <div id="term-loading-spinner" class="hidden mt-6">
+                <div class="animate-spin inline-block w-8 h-8 border-4 border-t-transparent border-[#4A9090] rounded-full"></div>
+                <p class="text-gray-600 mt-2">Buscando explicação...</p>
+            </div>
+            <div id="term-explanation-output" class="hidden mt-8 p-6 bg-white rounded-lg shadow-xl text-left max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Explicação:</h3>
+                <p id="term-explanation-text" class="text-gray-700"></p>
+                <button id="close-term-explanation" class="mt-6 bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-300">Fechar</button>
+            </div>
+        </section>
+
+        <section id="ask-report" class="mb-16 scroll-mt-20 text-center">
+            <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Pergunte ao Relatório ✨</h2>
+            <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-8">
+                Tem alguma pergunta específica sobre o diagnóstico de Sinop/MT? Digite-a abaixo e o modelo de linguagem tentará responder com base nas informações disponíveis.
+            </p>
+            <div class="max-w-xl mx-auto flex flex-col sm:flex-row gap-4">
+                <input type="text" id="question-input" placeholder="Ex: Qual o principal desafio ambiental de Sinop?" class="flex-grow p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4A9090]">
+                <button id="ask-question-btn" class="bg-[#4A9090] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#3B7A7A] transition-colors duration-300 shadow-lg">
+                    ✨ Perguntar
+                </button>
+            </div>
+            <div id="ask-loading-spinner" class="hidden mt-6">
+                <div class="animate-spin inline-block w-8 h-8 border-4 border-t-transparent border-[#4A9090] rounded-full"></div>
+                <p class="text-gray-600 mt-2">Processando sua pergunta...</p>
+            </div>
+            <div id="answer-output" class="hidden mt-8 p-6 bg-white rounded-lg shadow-xl text-left max-w-2xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Resposta:</h3>
+                <p id="answer-text" class="text-gray-700"></p>
+                <button id="close-answer" class="mt-6 bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-300">Fechar</button>
+            </div>
+        </section>
+    </main>
+    
+    <div id="ods-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full">
+            <div class="flex justify-between items-start">
+                 <h3 id="modal-title" class="text-lg font-bold"></h3>
+                 <button id="modal-close" class="text-2xl font-bold">&times;</button>
+            </div>
+            <div id="modal-content" class="mt-4 text-gray-600"></div>
+        </div>
+    </div>
+    
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p>Painel desenvolvido com base no Relatório de Diagnóstico Situacional de Sinop/MT para a Plataforma Picaps da Fiocruz Brasília.</p>
+            <p>Dados compilados de fontes como IBGE, IPEA, Secretarias de Saúde e Segurança Pública (2021-2025).</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const createChart = (ctx, type, data, options) => new Chart(ctx, { type, data, options });
+
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('pt-BR').format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e5e7eb'
+                        }
+                    }
+                }
+            };
+            
+            const genderPayGapData = {
+                labels: ['Salário Médio Mensal (2022)'],
+                datasets: [
+                    {
+                        label: 'Homens',
+                        data: [3766.95],
+                        backgroundColor: '#4A9090',
+                        borderColor: '#3B7A7A',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Mulheres',
+                        data: [2797.31],
+                        backgroundColor: '#E57373',
+                        borderColor: '#C75A5A',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    }
+                ]
+            };
+            createChart(
+                document.getElementById('genderPayGapChart').getContext('2d'),
+                'bar',
+                genderPayGapData,
+                { ...commonChartOptions, 
+                  indexAxis: 'y', 
+                  plugins: {
+                      ...commonChartOptions.plugins,
+                      title: { display: true, text: 'Disparidade Salarial de Gênero (2022)', font: { size: 16 } }
+                  }
+                }
+            );
+
+            const diseaseTrendData = {
+                labels: ['2023', '2024'],
+                datasets: [
+                    {
+                        label: 'Dengue (Casos Prováveis)',
+                        data: [464, 761],
+                        borderColor: '#F0B429',
+                        backgroundColor: 'rgba(240, 180, 41, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    },
+                     {
+                        label: 'Chikungunya (Casos Prováveis)',
+                        data: [0, 125],
+                        borderColor: '#E57373',
+                        backgroundColor: 'rgba(229, 115, 115, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }
+                ]
+            };
+            createChart(
+                document.getElementById('diseaseTrendChart').getContext('2d'),
+                'line',
+                diseaseTrendData,
+                { ...commonChartOptions, 
+                  plugins: {
+                      ...commonChartOptions.plugins,
+                      title: { display: true, text: 'Aumento de Arboviroses', font: { size: 16 } }
+                  }
+                }
+            );
+
+            const homicideData = {
+                labels: ['2020', '2021', '2022', '2023'],
+                datasets: [{
+                    label: 'Número de Vítimas',
+                    data: [82, 86, 126, 142],
+                    backgroundColor: '#E57373',
+                    borderColor: '#C75A5A',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }]
+            };
+            createChart(
+                document.getElementById('homicideChart').getContext('2d'),
+                'bar',
+                homicideData,
+                { ...commonChartOptions, 
+                  plugins: {
+                      ...commonChartOptions.plugins,
+                      title: { display: true, text: 'Evolução de Homicídios Dolosos', font: { size: 16 } },
+                      legend: { display: false }
+                  }
+                }
+            );
+
+            const femicideData = {
+                labels: ['2020', '2021', '2022', '2023'],
+                datasets: [{
+                    label: 'Número de Vítimas',
+                    data: [5, 8, 5, 8],
+                    borderColor: '#4A9090',
+                    backgroundColor: '#4A9090',
+                    tension: 0.1
+                }]
+            };
+            createChart(
+                document.getElementById('femicideChart').getContext('2d'),
+                'line',
+                femicideData,
+                { ...commonChartOptions, 
+                  plugins: {
+                      ...commonChartOptions.plugins,
+                      title: { display: true, text: 'Evolução de Feminicídios', font: { size: 16 } },
+                      legend: { display: false }
+                  }
+                }
+            );
+            
+            const odsData = [
+                { id: 1, name: 'Erradicação da Pobreza', status: 'red', detail: 'Apenas 29.14% dos inscritos no CadÚnico recebem Bolsa Família, muito abaixo da meta de 80.5%.' },
+                { id: 2, name: 'Fome Zero', status: 'red', detail: 'Apenas 10.9% dos produtores familiares recebem apoio do PRONAF (meta: 75%). Nenhum estabelecimento pratica agricultura orgânica.' },
+                { id: 3, name: 'Saúde e Bem-Estar', status: 'red', detail: 'Mortalidade infantil (14.1) e incidência de dengue (249.09) estão acima das metas.' },
+                { id: 4, name: 'Educação de Qualidade', status: 'red', detail: 'Apenas 23.05% dos jovens concluem o ensino médio até os 19 anos (meta: 70%).' },
+                { id: 5, name: 'Igualdade de Gênero', status: 'red', detail: 'Taxa de feminicídio (41.13) é alarmantemente alta (meta: 1). Apenas 6.67% de vereadoras (meta: 50%).' },
+                { id: 6, name: 'Água Potável e Saneamento', status: 'yellow', detail: 'Apenas 50.29% da população tem acesso a esgotamento sanitário (meta: 70%).' },
+                { id: 7, name: 'Energia Limpa', status: 'gray', detail: 'Dados não destacados no relatório.' },
+                { id: 8, name: 'Trabalho Decente', status: 'red', detail: 'Apenas 36.49% da população com 16 anos ou mais tem ocupação formal (meta: 68.19%).' },
+                { id: 9, name: 'Inovação e Infraestrutura', status: 'red', detail: 'Investimento público em infraestrutura (R$ 368.42/hab) é muito inferior à meta (R$ 3382.49/hab).' },
+                { id: 10, name: 'Redução das Desigualdades', status: 'red', detail: 'O Coeficiente de Gini é de 0.49 (meta: 0.3). Há grande disparidade racial em homicídios e acesso à educação.' },
+                { id: 11, name: 'Cidades Sustentáveis', status: 'red', detail: 'A taxa de mortes no trânsito (40.75) é muito superior à meta (6.8).' },
+                { id: 12, name: 'Consumo Responsável', status: 'red', detail: 'Não há recuperação de resíduos sólidos e nem coleta seletiva para a população.' },
+                { id: 13, name: 'Ação contra a Mudança Global do Clima', status: 'red', detail: 'Percentual de desflorestamento (0.6%) é 12 vezes maior que a meta (0.05%).' },
+                { id: 14, name: 'Vida na Água', status: 'red', detail: '0% do esgoto é tratado antes de chegar aos rios, com meta de 70%.' },
+                { id: 15, name: 'Vida Terrestre', status: 'red', detail: 'Apenas 0.05% do território são unidades de conservação (meta: 28.69%).' },
+                { id: 16, name: 'Paz, Justiça e Instituições Eficazes', status: 'red', detail: 'Taxa de homicídio (20.38) e homicídio juvenil masculino (120.25) estão muito acima das metas.'},
+                { id: 17, name: 'Parcerias e Meios de Implementação', status: 'yellow', detail: 'Investimento público (R$ 548.29) está próximo, mas ainda abaixo da meta (R$ 563.26).' },
+            ];
+
+            const odsGrid = document.getElementById('ods-grid');
+            const modal = document.getElementById('ods-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const modalClose = document.getElementById('modal-close');
+
+            const statusClasses = {
+                red: 'bg-red-200 text-red-800 hover:bg-red-300',
+                yellow: 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300',
+                gray: 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+            };
+
+            odsData.forEach(ods => {
+                const odsElement = document.createElement('div');
+                odsElement.className = `p-4 rounded-lg cursor-pointer transition-colors duration-300 text-center font-semibold ${statusClasses[ods.status]}`;
+                odsElement.textContent = `ODS ${ods.id}`;
+                odsElement.onclick = () => {
+                    modalTitle.textContent = `ODS ${ods.id}: ${ods.name}`;
+                    modalContent.textContent = ods.detail;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                };
+                odsGrid.appendChild(odsElement);
+            });
+            
+            modalClose.onclick = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            };
+
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            };
+            
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // Gemini API Integration for Policy Recommendations
+            const generateRecommendationsBtn = document.getElementById('generate-recommendations');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const recommendationsOutput = document.getElementById('recommendations-output');
+            const recommendationsList = document.getElementById('recommendations-list');
+            const closeRecommendationsBtn = document.getElementById('close-recommendations');
+
+            generateRecommendationsBtn.addEventListener('click', async () => {
+                generateRecommendationsBtn.disabled = true; // Disable button during loading
+                loadingSpinner.classList.remove('hidden'); // Show loading spinner
+                recommendationsOutput.classList.add('hidden'); // Hide previous output if any
+                recommendationsList.innerHTML = ''; // Clear previous recommendations
+
+                // Constructing a detailed prompt for the LLM based on dashboard data
+                const prompt = `Com base nos seguintes desafios críticos enfrentados pelo município de Sinop/MT, identificados em um diagnóstico situacional:
+- Alta taxa de feminicídio (41.13 por 100 mil, meta: 1) e homicídios gerais (20.38 por 100 mil).
+- Déficit habitacional de 39% da população (equivalente a 6.904 domicílios).
+- Baixa taxa de conclusão do ensino médio (apenas 23.05% dos jovens aos 19 anos, meta: 70%).
+- Alta mortalidade infantil (14.14 óbitos por 1.000 nascidos vivos, maior índice desde 1996) e surtos crescentes de arboviroses (Dengue, Chikungunya).
+- Apenas 50.29% da população com acesso a esgotamento sanitário (meta: 70%).
+- Desmatamento anual de 0.6% da área, 12 vezes maior que a meta (0.05%).
+- Zero tratamento de esgoto antes de descarte em rios (meta: 70%).
+- Apenas 0.05% do território designado como unidades de conservação (meta: 28.69%).
+- Apenas 29.14% dos inscritos no CadÚnico recebem Bolsa Família (meta: 80.5%).
+- Apenas 10.9% dos produtores familiares recebem apoio do PRONAF (meta: 75%).
+
+Por favor, forneça 5 a 7 recomendações de políticas públicas de alto nível, intersetoriais e orientadas para a ação para o município de Sinop/MT, focando em soluções integradas e sustentáveis para abordar esses problemas. As recomendações devem ser concisas, objetivas e focar em resultados tangíveis.`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // API key is provided by the Canvas environment if empty
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        // Assuming LLM returns recommendations as a list (numbered or bulleted)
+                        const recommendationsArray = text.split('\n').filter(line => line.trim() !== '');
+                        recommendationsArray.forEach(rec => {
+                            const li = document.createElement('li');
+                            // Clean up potential numbering from LLM output
+                            li.textContent = rec.replace(/^\d+\.\s*|-\s*/, ''); 
+                            recommendationsList.appendChild(li);
+                        });
+                        recommendationsOutput.classList.remove('hidden'); // Show recommendations
+                    } else {
+                        // Handle cases where the response structure is unexpected or content is missing
+                        recommendationsList.innerHTML = '<li class="text-red-500">Não foi possível gerar recomendações no momento. A resposta da API não foi a esperada.</li>';
+                        recommendationsOutput.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Erro ao chamar a API Gemini:', error);
+                    recommendationsList.innerHTML = '<li class="text-red-500">Ocorreu um erro de conexão ou processamento ao gerar as recomendações. Por favor, tente novamente.</li>';
+                    recommendationsOutput.classList.remove('hidden');
+                } finally {
+                    loadingSpinner.classList.add('hidden'); // Hide loading spinner
+                    generateRecommendationsBtn.disabled = false; // Re-enable button
+                }
+            });
+
+            // Close recommendations display
+            closeRecommendationsBtn.addEventListener('click', () => {
+                recommendationsOutput.classList.add('hidden');
+            });
+
+            // Gemini API Integration for Term Explanation
+            const termInput = document.getElementById('term-input');
+            const explainTermBtn = document.getElementById('explain-term');
+            const termLoadingSpinner = document.getElementById('term-loading-spinner');
+            const termExplanationOutput = document.getElementById('term-explanation-output');
+            const termExplanationText = document.getElementById('term-explanation-text');
+            const closeTermExplanationBtn = document.getElementById('close-term-explanation');
+
+            explainTermBtn.addEventListener('click', async () => {
+                const term = termInput.value.trim();
+                if (!term) {
+                    termExplanationText.textContent = 'Por favor, digite um termo para explicar.';
+                    termExplanationOutput.classList.remove('hidden');
+                    return;
+                }
+
+                explainTermBtn.disabled = true;
+                termLoadingSpinner.classList.remove('hidden');
+                termExplanationOutput.classList.add('hidden');
+                termExplanationText.textContent = '';
+
+                const prompt = `Explique o termo '${term}' no contexto de um diagnóstico situacional de um município, como Sinop/MT, de forma concisa e clara. Se aplicável, mencione como este termo se relaciona com os desafios sociais, de saúde ou ambientais de uma cidade.`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const explanation = result.candidates[0].content.parts[0].text;
+                        termExplanationText.textContent = explanation;
+                        termExplanationOutput.classList.remove('hidden');
+                    } else {
+                        termExplanationText.textContent = 'Não foi possível encontrar uma explicação para o termo. A resposta da API não foi a esperada.';
+                        termExplanationOutput.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Erro ao chamar a API Gemini para explicação de termo:', error);
+                    termExplanationText.textContent = 'Ocorreu um erro de conexão ou processamento ao buscar a explicação. Por favor, tente novamente.';
+                    termExplanationOutput.classList.remove('hidden');
+                } finally {
+                    termLoadingSpinner.classList.add('hidden');
+                    explainTermBtn.disabled = false;
+                }
+            });
+
+            closeTermExplanationBtn.addEventListener('click', () => {
+                termExplanationOutput.classList.add('hidden');
+            });
+
+            // New Gemini API Integration for Ask the Report
+            const questionInput = document.getElementById('question-input');
+            const askQuestionBtn = document.getElementById('ask-question-btn');
+            const askLoadingSpinner = document.getElementById('ask-loading-spinner');
+            const answerOutput = document.getElementById('answer-output');
+            const answerText = document.getElementById('answer-text');
+            const closeAnswerBtn = document.getElementById('close-answer');
+
+            askQuestionBtn.addEventListener('click', async () => {
+                const question = questionInput.value.trim();
+                if (!question) {
+                    answerText.textContent = 'Por favor, digite uma pergunta.';
+                    answerOutput.classList.remove('hidden');
+                    return;
+                }
+
+                askQuestionBtn.disabled = true;
+                askLoadingSpinner.classList.remove('hidden');
+                answerOutput.classList.add('hidden');
+                answerText.textContent = '';
+
+                // Contextual data from the report to help the LLM answer
+                const contextData = `
+                Diagnóstico Situacional de Sinop/MT:
+
+                População: 216.000 (2024)
+                PIB per capita: R$ 64.607,12 (2021)
+                IDHM: 0,754 (Alto, 2010)
+
+                Sociedade Desigual:
+                - Salário Médio Mensal (2022): Homens: R$ 3.766,95; Mulheres: R$ 2.797,31.
+                - Déficit Habitacional: 39% da população (6.904 domicílios).
+                - Violação de Direitos da População Negra: 82ª posição nacional em alta violação.
+                - Acesso ao Bolsa Família: 29,14% dos inscritos no CadÚnico (meta: 80,5%).
+
+                Saúde Pública Sob Pressão:
+                - Mortalidade Infantil (2022): 14,14 óbitos por 1.000 nascidos vivos (maior desde 1996, meta: 10).
+                - Arboviroses (casos prováveis): Dengue 2023: 464, 2024: 761; Chikungunya 2023: 0, 2024: 125.
+                - Acesso a Esgotamento Sanitário: 50,29% da população (meta: 70%).
+
+                Escalada da Violência:
+                - Homicídios Dolosos: 2020: 82, 2023: 142.
+                - Feminicídios: 5 a 8 vítimas/ano (2020-2023); taxa de 41,13 por 100 mil (meta: 1).
+                - Mortalidade no Trânsito: 40,75 por 100 mil habitantes (meta: 6,8).
+
+                Custo Ambiental do Desenvolvimento:
+                - Desmatamento: 0,6% anual (12x maior que a meta de 0,05%).
+                - Impacto Hidrelétrico: UHE Sinop causou morte de >30 toneladas de peixes, inundou floresta.
+                - Uso de Agrotóxicos: Associado a intoxicações e possível aumento de câncer infantil.
+                - Tratamento de Esgoto: 0% antes de descarte em rios (meta: 70%).
+                - Unidades de Conservação: 0,05% do território (meta: 28,69%).
+
+                ODS (Objetivos de Desenvolvimento Sustentável) - Sinop enfrenta "grandes desafios" ou "desafios significativos" na maioria das metas da Agenda 2030, incluindo: Pobreza, Fome Zero, Saúde, Educação, Igualdade de Gênero, Saneamento, Trabalho Decente, Inovação e Infraestrutura, Redução das Desigualdades, Cidades Sustentáveis, Consumo Responsável, Ação contra o Clima, Vida na Água, Vida Terrestre, Paz e Justiça, e Parcerias.
+                `;
+
+                const prompt = `Com base no seguinte diagnóstico situacional do município de Sinop/MT:
+                ${contextData}
+                
+                Responda à seguinte pergunta de forma concisa e direta, utilizando apenas as informações fornecidas no diagnóstico. Se a informação não estiver explicitamente no texto, diga que não pode responder com os dados disponíveis.
+                
+                Pergunta: ${question}`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const answer = result.candidates[0].content.parts[0].text;
+                        answerText.textContent = answer;
+                        answerOutput.classList.remove('hidden');
+                    } else {
+                        answerText.textContent = 'Não foi possível encontrar uma resposta com os dados disponíveis. A resposta da API não foi a esperada.';
+                        answerOutput.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Erro ao chamar a API Gemini para perguntas e respostas:', error);
+                    answerText.textContent = 'Ocorreu um erro de conexão ou processamento ao buscar a resposta. Por favor, tente novamente.';
+                    answerOutput.classList.remove('hidden');
+                } finally {
+                    askLoadingSpinner.classList.add('hidden');
+                    askQuestionBtn.disabled = false;
+                }
+            });
+
+            closeAnswerBtn.addEventListener('click', () => {
+                answerOutput.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
